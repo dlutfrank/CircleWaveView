@@ -32,24 +32,24 @@ public class CircleWaveActivity extends AppCompatActivity {
         String str;
         str = getString(R.string.wave_c) + ": " + circleWaveView.getWaveCoefficient();
         tvWave.setText(str);
-        str = getString(R.string.am_c) + ": " + circleWaveView.getAmCoefficient();
+        str = getString(R.string.am_c) + ": " + circleWaveView.getAmplitudeCoefficient();
         tvAm.setText(str);
-        str = getString(R.string.inc_dx) + ": " + circleWaveView.getDx();
+        str = getString(R.string.inc_dx) + ": " + circleWaveView.getWaveStep();
         tvDx.setText(str);
-        str = getString(R.string.refresh_delay) + ": " + circleWaveView.getDelay();
+        str = getString(R.string.refresh_delay) + ": " + circleWaveView.getDrawDelay();
         tvDelay.setText(str);
         if (seekBar != null) {
-            seekBar.setProgress(circleWaveView.getDx());
+            seekBar.setProgress(circleWaveView.getWaveStep());
             seekBar.setOnSeekBarChangeListener(listener);
         }
         seekBar = (SeekBar) findViewById(R.id.sb_draw_delay);
         if (seekBar != null) {
-            seekBar.setProgress(circleWaveView.getDelay());
+            seekBar.setProgress(circleWaveView.getDrawDelay());
             seekBar.setOnSeekBarChangeListener(listener);
         }
         seekBar = (SeekBar) findViewById(R.id.sb_amplitude);
         if (seekBar != null) {
-            seekBar.setProgress(circleWaveView.getAmCoefficient());
+            seekBar.setProgress(circleWaveView.getAmplitudeCoefficient());
             seekBar.setOnSeekBarChangeListener(listener);
         }
         seekBar = (SeekBar) findViewById(R.id.sb_wavec);
@@ -76,14 +76,14 @@ public class CircleWaveActivity extends AppCompatActivity {
             String str = null;
             switch (seekBar.getId()) {
                 case R.id.sb_amplitude: {
-                    circleWaveView.setAmCoefficient(progress);
-                    str = getString(R.string.am_c) + ": " + circleWaveView.getAmCoefficient();
+                    circleWaveView.setAmplitudeCoefficient(progress);
+                    str = getString(R.string.am_c) + ": " + circleWaveView.getAmplitudeCoefficient();
                     tvAm.setText(str);
                 }
                 break;
                 case R.id.sb_dx: {
                     circleWaveView.setDx(progress);
-                    str = getString(R.string.inc_dx) + ": " + circleWaveView.getDx();
+                    str = getString(R.string.inc_dx) + ": " + circleWaveView.getWaveStep();
                     tvDx.setText(str);
                 }
                 break;
@@ -95,7 +95,7 @@ public class CircleWaveActivity extends AppCompatActivity {
                 break;
                 case R.id.sb_draw_delay: {
                     circleWaveView.setDrawDelay(progress);
-                    str = getString(R.string.refresh_delay) + ": " + circleWaveView.getDelay();
+                    str = getString(R.string.refresh_delay) + ": " + circleWaveView.getDrawDelay();
                     tvDelay.setText(str);
                 }
                 break;

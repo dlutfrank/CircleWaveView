@@ -106,60 +106,60 @@ public class CircleWaveView extends View {
     }
 
 
-    private int mDx = 1;
+    private int waveStep = 30;
 
-    public void setDx(int dx) {
-        if (dx < 1) {
-            dx = 1;
+    public void setDx(int ws) {
+        if (ws < 1) {
+            ws = 1;
         }
-        mDx = dx;
+        waveStep = ws;
     }
 
-    public int getDx() {
-        return mDx;
+    public int getWaveStep() {
+        return waveStep;
     }
 
-    private int mDelay = 20;
+    private int drawDelay = 40;
 
     public void setDrawDelay(int delay) {
         if (delay < 20) {
             delay = 20;
         }
-        mDelay = delay;
+        drawDelay = delay;
     }
 
-    public int getDelay() {
-        return mDelay;
+    public int getDrawDelay() {
+        return drawDelay;
     }
 
-    private int mWaveCoefficient = 3;
+    private int waveCoefficient = 3;
 
     public int getWaveCoefficient() {
-        return mWaveCoefficient;
+        return waveCoefficient;
+    }
+
+    private int amplitudeCoefficient = 2;
+
+    public int getAmplitudeCoefficient() {
+        return amplitudeCoefficient;
     }
 
     public void setWaveCoefficient(int coefficient) {
         if (coefficient < 1) {
             coefficient = 1;
         }
-        mWaveCoefficient = coefficient;
-        mWaveLength = (int) mRadius * mWaveCoefficient;
+        waveCoefficient = coefficient;
+        mWaveLength = (int) mRadius * waveCoefficient;
         xoffset = (int) (mWidth / 2 - mRadius - mWaveLength / 2);
     }
 
-    private int amCoefficient = 1;
-
-    public int getAmCoefficient() {
-        return amCoefficient;
-    }
-
-    public void setAmCoefficient(int coefficient) {
+    public void setAmplitudeCoefficient(int coefficient) {
         if (coefficient < 1) {
             coefficient = 1;
         }
-        amCoefficient = coefficient;
+        amplitudeCoefficient = coefficient;
         float offset = mHeight / 2 - mRadius;
-        amplitude = (y < mHeight / 2 ? y - offset : 2 * mRadius - y + offset) * amCoefficient * 0.2f;
+        amplitude = (y < mHeight / 2 ? y - offset : 2 * mRadius - y + offset) * amplitudeCoefficient * 0.2f;
     }
 
     public void setPercent(int percent) {
@@ -178,7 +178,7 @@ public class CircleWaveView extends View {
         if (mHeight > 0) {
             float offset = mHeight / 2 - mRadius;
             y = (int) ((1 - percent / 100f) * 2 * mRadius + offset);
-            amplitude = (y < mHeight / 2 ? y - offset : 2 * mRadius - y + offset) * amCoefficient * 0.2f;
+            amplitude = (y < mHeight / 2 ? y - offset : 2 * mRadius - y + offset) * amplitudeCoefficient * 0.2f;
         }
     }
 
@@ -213,7 +213,7 @@ public class CircleWaveView extends View {
         if (defRadius != 0 && defRadius < mRadius) {
             mRadius = defRadius;
         }
-        mWaveLength = (int) mRadius * mWaveCoefficient;
+        mWaveLength = (int) mRadius * waveCoefficient;
         xoffset = (int) (mWidth / 2 - mRadius - mWaveLength / 2);
         setPercent();
         setMeasuredDimension(mWidth, mHeight);
@@ -242,7 +242,7 @@ public class CircleWaveView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         if (dx < mWaveLength) {
-            dx += mDx;
+            dx += waveStep;
         } else {
             dx = 0;
         }
@@ -279,7 +279,7 @@ public class CircleWaveView extends View {
         canvas.restoreToCount(id);
 
         if (isWaveEnable) {
-            postInvalidateDelayed(mDelay);
+            postInvalidateDelayed(drawDelay);
         }
     }
 }
