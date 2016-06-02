@@ -9,6 +9,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -46,23 +47,19 @@ public class CircleWaveView extends View {
 
     private float mRadius;
     private final float defRadius;
-
     private int xoffset = 0;
     private int y;
 
+    private float amplitude = 0;
+    private int mWaveLength = 0;
     private int percent = 50;
     private int dx = 0;
 
     boolean isWaveEnable = true;
-
     private Path mPath;
 
     private PorterDuffXfermode mPorterDuffXferMode;
-
     private final static int DEFAULT_SIZE = 400;
-
-    private float amplitude = 0;
-    private int mWaveLength = 0;
 
     private Bitmap mSrc;
     private Bitmap mDst;
@@ -191,13 +188,24 @@ public class CircleWaveView extends View {
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        Drawable bg = getBackground();
         if (widthMode == MeasureSpec.AT_MOST) {
-            mWidth = DEFAULT_SIZE;
+            if (bg != null) {
+                mWidth = bg.getIntrinsicWidth();
+            }
+            if (mWidth <= 0) {
+                mWidth = DEFAULT_SIZE;
+            }
         } else {
             mWidth = widthSize;
         }
         if (heightMode == MeasureSpec.AT_MOST) {
-            mHeight = DEFAULT_SIZE;
+            if (bg != null) {
+                mHeight = bg.getIntrinsicHeight();
+            }
+            if (mHeight <= 0) {
+                mHeight = DEFAULT_SIZE;
+            }
         } else {
             mHeight = heightSize;
         }
@@ -245,7 +253,6 @@ public class CircleWaveView extends View {
             for (int i = -mWaveLength; i < mRadius * 2 + xoffset + mWaveLength; i += mWaveLength) {
                 mPath.rCubicTo(mWaveLength / 4.0f, amplitude, 3.0f * mWaveLength / 4, -amplitude, mWaveLength, 0);
             }
-//            mPath.cubicTo(100 + x * 2, y + 50, 100 + x * 2, y - 50, mWidth, y);
         } else {
             mPath.moveTo(0, y);
             mPath.lineTo(mWidth, y);
@@ -263,9 +270,8 @@ public class CircleWaveView extends View {
         mDstCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         mDstCanvas.drawPath(mPath, mWavePaint);
 
-        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-
         int id = canvas.saveLayer(0, 0, mWidth, mHeight, null, Canvas.ALL_SAVE_FLAG);
+        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         canvas.drawBitmap(mSrc, 0, 0, mPaint);
         mPaint.setXfermode(mPorterDuffXferMode);
         canvas.drawBitmap(mDst, 0, 0, mPaint);
