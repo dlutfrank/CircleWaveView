@@ -17,6 +17,18 @@ import com.swx.softdraft.R;
 /**
  * Created by swx on 3/31/16.
  * wave animation
+ * -----------------------------|---> x
+ * |                 |          |
+ * |              yoffset       |
+ * |            ___________     |
+ * |            |    |    |   height
+ * |- xoffset - |-- 2R -- |     |
+ * |            |    |    |     |
+ * |            |_________|     |
+ * |                            |
+ * |_______________width________|
+ * |
+ * y
  */
 
 public class CircleWaveView extends View {
@@ -32,12 +44,14 @@ public class CircleWaveView extends View {
     private int mWidth;
     private int mHeight;
 
-    private int x = 51;
+    private float mRadius;
+    private final float defRadius;
+
+    private int xoffset = 0;
     private int y;
 
     private int percent = 50;
-
-    boolean isLeft = true;
+    private int dx = 0;
 
     boolean isWaveEnable = true;
 
@@ -46,6 +60,9 @@ public class CircleWaveView extends View {
     private PorterDuffXfermode mPorterDuffXferMode;
 
     private final static int DEFAULT_SIZE = 400;
+
+    private float amplitude = 0;
+    private int mWaveLength = 0;
 
     private Bitmap mSrc;
     private Bitmap mDst;
@@ -63,8 +80,9 @@ public class CircleWaveView extends View {
     public CircleWaveView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.CircleWaveView, defStyleAttr, 0);
-        circleColor = array.getColor(R.styleable.CircleWaveView_circleColor, Color.BLUE);
+        circleColor = array.getColor(R.styleable.CircleWaveView_circleColor, Color.BLACK);
         waveColor = array.getColor(R.styleable.CircleWaveView_waveColor, Color.YELLOW);
+        defRadius = array.getDimension(R.styleable.CircleWaveView_waveRadius, 0);
         array.recycle();
 
         setLayerType(View.LAYER_TYPE_SOFTWARE, null);
@@ -90,6 +108,63 @@ public class CircleWaveView extends View {
         postInvalidate();
     }
 
+
+    private int mDx = 1;
+
+    public void setDx(int dx) {
+        if (dx < 1) {
+            dx = 1;
+        }
+        mDx = dx;
+    }
+
+    public int getDx() {
+        return mDx;
+    }
+
+    private int mDelay = 20;
+
+    public void setDrawDelay(int delay) {
+        if (delay < 20) {
+            delay = 20;
+        }
+        mDelay = delay;
+    }
+
+    public int getDelay() {
+        return mDelay;
+    }
+
+    private int mWaveCoefficient = 3;
+
+    public int getWaveCoefficient() {
+        return mWaveCoefficient;
+    }
+
+    public void setWaveCoefficient(int coefficient) {
+        if (coefficient < 1) {
+            coefficient = 1;
+        }
+        mWaveCoefficient = coefficient;
+        mWaveLength = (int) mRadius * mWaveCoefficient;
+        xoffset = (int) (mWidth / 2 - mRadius - mWaveLength / 2);
+    }
+
+    private int amCoefficient = 1;
+
+    public int getAmCoefficient() {
+        return amCoefficient;
+    }
+
+    public void setAmCoefficient(int coefficient) {
+        if (coefficient < 1) {
+            coefficient = 1;
+        }
+        amCoefficient = coefficient;
+        float offset = mHeight / 2 - mRadius;
+        amplitude = (y < mHeight / 2 ? y - offset : 2 * mRadius - y + offset) * amCoefficient * 0.2f;
+    }
+
     public void setPercent(int percent) {
         if (percent < 0) {
             this.percent = 0;
@@ -98,23 +173,15 @@ public class CircleWaveView extends View {
         } else {
             this.percent = percent;
         }
+        setPercent();
         postInvalidate();
     }
 
-    private void makeSrc(int width, int height) {
-        if (mSrc == null || mSrc.getWidth() != width || mSrc.getHeight() != height) {
-            mSrc = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(mSrc);
-            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            paint.setColor(circleColor);
-            canvas.drawCircle(mWidth / 2, mHeight / 2, mWidth / 2, paint);
-        }
-    }
-
-    private void makeDst(int width, int height) {
-        if (mDst == null || mDst.getWidth() != width || mDst.getHeight() != height) {
-            mDst = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            mDstCanvas = new Canvas(mDst);
+    private void setPercent() {
+        if (mHeight > 0) {
+            float offset = mHeight / 2 - mRadius;
+            y = (int) ((1 - percent / 100f) * 2 * mRadius + offset);
+            amplitude = (y < mHeight / 2 ? y - offset : 2 * mRadius - y + offset) * amCoefficient * 0.2f;
         }
     }
 
@@ -134,42 +201,53 @@ public class CircleWaveView extends View {
         } else {
             mHeight = heightSize;
         }
+        mRadius = mWidth > mHeight ? mHeight / 2 : mWidth / 2;
+        if (defRadius != 0 && defRadius < mRadius) {
+            mRadius = defRadius;
+        }
+        mWaveLength = (int) mRadius * mWaveCoefficient;
+        xoffset = (int) (mWidth / 2 - mRadius - mWaveLength / 2);
+        setPercent();
         setMeasuredDimension(mWidth, mHeight);
     }
 
     // src path
     // dst circle
-//
-//    private Bitmap mBitmap;
-//    private Canvas mCanvas;
-//
-//    private void makeBitmap() {
-//        if (mBitmap == null || mBitmap.getWidth() != mWidth || mBitmap.getHeight() != mHeight) {
-//            mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
-//            mCanvas = new Canvas(mBitmap);
-//        }
-//    }
+
+    private void makeSrc(int width, int height) {
+        if (mSrc == null || mSrc.getWidth() != width || mSrc.getHeight() != height) {
+            mSrc = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(mSrc);
+            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            paint.setColor(circleColor);
+            canvas.drawCircle(mWidth / 2, mHeight / 2, mRadius, paint);
+        }
+    }
+
+    private void makeDst(int width, int height) {
+        if (mDst == null || mDst.getWidth() != width || mDst.getHeight() != height) {
+            mDst = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            mDstCanvas = new Canvas(mDst);
+        }
+    }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (x > 50) {
-            isLeft = true;
-        } else if (x < 0) {
-            isLeft = false;
-        }
-        if (isLeft) {
-            x -= 10;
+        if (dx < mWaveLength) {
+            dx += mDx;
         } else {
-            x += 10;
+            dx = 0;
         }
 
         mPath.reset();
-
-        y = (int) ((1 - percent / 100f) * mHeight);
-        mPath.moveTo(0, y);
         if (isWaveEnable) {
-            mPath.cubicTo(100 + x * 2, y + 50, 100 + x * 2, y - 50, mWidth, y);
+            mPath.moveTo(-mWaveLength + dx + xoffset, y);
+            for (int i = -mWaveLength; i < mRadius * 2 + xoffset + mWaveLength; i += mWaveLength) {
+                mPath.rCubicTo(mWaveLength / 4.0f, amplitude, 3.0f * mWaveLength / 4, -amplitude, mWaveLength, 0);
+            }
+//            mPath.cubicTo(100 + x * 2, y + 50, 100 + x * 2, y - 50, mWidth, y);
         } else {
+            mPath.moveTo(0, y);
             mPath.lineTo(mWidth, y);
         }
 
@@ -179,15 +257,6 @@ public class CircleWaveView extends View {
 
         super.onDraw(canvas);
 
-//        makeBitmap();
-//        mBitmap.eraseColor(Color.TRANSPARENT);
-//        mCanvas.drawCircle(mWidth / 2, mHeight / 2, mWidth / 2, mCirclePaint);
-//        mWavePaint.setXfermode(mPorterDuffXferMode);
-//        mCanvas.drawPath(mPath, mWavePaint);
-//        mWavePaint.setXfermode(null);
-//        canvas.drawBitmap(mBitmap, 0, 0, null);
-
-//----
         makeSrc(mWidth, mHeight);
         makeDst(mWidth, mHeight);
 
@@ -202,17 +271,9 @@ public class CircleWaveView extends View {
         canvas.drawBitmap(mDst, 0, 0, mPaint);
         mPaint.setXfermode(null);
         canvas.restoreToCount(id);
-//-----
-//        canvas.drawColor(Color.WHITE);
-//        int canvasWidth = canvas.getWidth();
-//        int canvasHeight = canvas.getHeight();
-//        int saveLayerId = canvas.saveLayer(0, 0, canvasWidth, canvasHeight, null, Canvas.ALL_SAVE_FLAG);
-//        canvas.drawCircle(mWidth / 2, mHeight / 2, mWidth / 2, mCirclePaint);
-//        canvas.drawPath(mPath, mWavePaint);
-//        canvas.restoreToCount(saveLayerId);
 
         if (isWaveEnable) {
-            postInvalidateDelayed(50);
+            postInvalidateDelayed(mDelay);
         }
     }
 }

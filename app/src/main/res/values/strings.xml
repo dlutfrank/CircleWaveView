@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">softdraft</string>
+    <string name="refresh_delay">刷新延时</string>
+    <string name="inc_dx">增长步幅</string>
+    <string name="am_c">振幅系数</string>
+    <string name="wave_c">波长系数</string>
 </resources>
