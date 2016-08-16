@@ -174,6 +174,10 @@ public class CircleWaveView extends View {
         postInvalidate();
     }
 
+    public int getPercent() {
+        return this.percent;
+    }
+
     private void setPercent() {
         if (mHeight > 0) {
             float offset = mHeight / 2 - mRadius;

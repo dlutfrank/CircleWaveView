@@ -14,6 +14,8 @@ public class CircleWaveActivity extends AppCompatActivity {
     private TextView tvAm;
     private TextView tvDelay;
     private TextView tvDx;
+    private TextView tvPercent;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +31,8 @@ public class CircleWaveActivity extends AppCompatActivity {
         tvAm = (TextView) findViewById(R.id.tv_am);
         tvDx = (TextView) findViewById(R.id.tv_dx);
         tvDelay = (TextView) findViewById(R.id.tv_delay);
+        tvPercent = (TextView) findViewById(R.id.tv_percent);
+
         String str;
         str = getString(R.string.wave_c) + ": " + circleWaveView.getWaveCoefficient();
         tvWave.setText(str);
@@ -38,6 +42,8 @@ public class CircleWaveActivity extends AppCompatActivity {
         tvDx.setText(str);
         str = getString(R.string.refresh_delay) + ": " + circleWaveView.getDrawDelay();
         tvDelay.setText(str);
+        str = getString(R.string.percent) + ": " + circleWaveView.getPercent();
+        tvPercent.setText(str);
         if (seekBar != null) {
             seekBar.setProgress(circleWaveView.getWaveStep());
             seekBar.setOnSeekBarChangeListener(listener);
@@ -55,6 +61,11 @@ public class CircleWaveActivity extends AppCompatActivity {
         seekBar = (SeekBar) findViewById(R.id.sb_wavec);
         if (seekBar != null) {
             seekBar.setProgress(circleWaveView.getWaveCoefficient());
+            seekBar.setOnSeekBarChangeListener(listener);
+        }
+        seekBar = (SeekBar) findViewById(R.id.sb_percent);
+        if (seekBar != null) {
+            seekBar.setProgress(circleWaveView.getPercent());
             seekBar.setOnSeekBarChangeListener(listener);
         }
     }
@@ -99,6 +110,11 @@ public class CircleWaveActivity extends AppCompatActivity {
                     tvDelay.setText(str);
                 }
                 break;
+                case R.id.sb_percent: {
+                    circleWaveView.setPercent(progress);
+                    str = getString(R.string.percent) + ": " + circleWaveView.getPercent();
+                    tvPercent.setText(str);
+                }
                 default:
                     break;
             }

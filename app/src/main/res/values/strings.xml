@@ -4,4 +4,5 @@
     <string name="inc_dx">增长步幅</string>
     <string name="am_c">振幅系数</string>
     <string name="wave_c">波长系数</string>
+    <string name="percent">百分比</string>
 </resources>
